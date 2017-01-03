@@ -3,6 +3,12 @@
  * 
  * The purpose of this document is to come to a better understanding of the fundamentals of game developmeny by building a simple platformer from scratch at a low level (but not quite down to assembly at the moment).
  * 
+ * TODO
+ * - make git repo, many incremental commits
+ * - fix issue when holding left and right (actually not possible on physical hardware...)
+ * - add a single platform
+ * - implement a global coordinate system, array of platform positions and sizes, and a camera
+ * 
  */
 
 #include "gba.h" //memory addresses and type shortcuts
@@ -15,35 +21,61 @@ int main(void) {
     SetMode(MODE_3 | BG2_ENABLE); //screenmode.h
     // 240 px wide, 160 px tall
 
-    word xpos = 10,
-         ypos = 100,
-         xvel = 1,
-         yvel = 2;
+    s32 xpos = 10, // must be signed
+        ypos = 100,
+        xvel = 0,
+        yvel = 0,
+        xacc = 0,
+        yacc = 0;
 
-    const word GRAV = 1,
-               FLOOR = 30,
-               SPEED = 5,
-               JUMP = 10;
+    const s32 GRAV  = 1,
+              FLOOR = 30,
+              SPEED = 7,
+              JUMP  = 10;
+
+    // draw floor
+    word i;
+    for (i = 0; i < 240; i++)
+        (VideoBuffer)[(160-FLOOR+2)*240+i] = RGB(0,10,31);
 
     while (1) {
 
-        // erase old sprite (point)
+        // erase old sprite (well, point)
         (VideoBuffer)[(160-ypos)*240+xpos] = RGB(0,0,0);
 
         // get input
         if (KEYS & KEY_LEFT)
-            xvel = -1*SPEED;
+            xacc--;
         if (KEYS & KEY_RIGHT)
-            xvel = SPEED;
-        if (!KEYS || (!(KEYS & KEY_LEFT) && !(KEYS & KEY_RIGHT))) // oh god please improve this (actually think, simplify)
-            xvel = 0;
-        if (KEYS & KEY_UP && ypos == FLOOR) // only JUMP if on FLOOR
+            xacc++;
+        if (!(KEYS & (KEY_LEFT|KEY_RIGHT))) // decelerate if neither pressed
+            if (xvel > 0)
+                xacc = -1;
+            else if (xvel < 0)
+                xacc = 1;
+            else
+                xacc = 0;
+        if (KEYS & KEY_UP && ypos == FLOOR) // only jump if on floor
             yvel = JUMP;
 
         // simulate
         yvel -= GRAV; // apply gravity
-        xpos += xvel; // apply velocity
+
+        xvel += xacc; // apply acceleration
+        yvel += yacc;
+
+        if (xvel > SPEED) // enfore maximum velocities
+            xvel = SPEED;
+        if (xvel < -1*SPEED)
+           xvel = -1*SPEED;
+
+        // apply velocity
+        if (ypos > FLOOR)
+            xpos += 0.7*xvel; // air resistance
+        else
+            xpos += xvel; 
         ypos += yvel;
+
         if (ypos < FLOOR) { // pop out of floor
             ypos = FLOOR;
             yvel = 0;
