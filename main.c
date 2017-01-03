@@ -4,8 +4,8 @@
  * The purpose of this document is to come to a better understanding of the fundamentals of game developmeny by building a simple platformer from scratch at a low level (but not quite down to assembly at the moment).
  * 
  * TODO
- * - make git repo, many incremental commits
  * - fix issue when holding left and right (actually not possible on physical hardware...)
+ * - subpixel positioning and detach movement speed from frame rate
  * - add a single platform
  * - implement a global coordinate system, array of platform positions and sizes, and a camera
  * 
@@ -36,7 +36,7 @@ int main(void) {
     // draw floor
     word i;
     for (i = 0; i < 240; i++)
-        (VideoBuffer)[(160-FLOOR+2)*240+i] = RGB(0,10,31);
+        (VideoBuffer)[(160-FLOOR+1)*240+i] = RGB(0,10,31);
 
     while (1) {
 
