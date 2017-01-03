@@ -76,6 +76,10 @@ int main(void) {
             xpos += xvel; 
         ypos += yvel;
 
+        if (xpos > 240) // wrap x-coordinate
+            xpos -= 240;
+        if (xpos < 0)
+            xpos += 240;
         if (ypos < FLOOR) { // pop out of floor
             ypos = FLOOR;
             yvel = 0;
