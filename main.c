@@ -10,50 +10,52 @@
 #include "keypad.h" //buttons and input register
 #include "gfx.h" //RGB macro, sleep, random
 
-// void drawRect(int x, int y, int width, int height, int red, int green, int blue);
-
 int main(void) {
 
     SetMode(MODE_3 | BG2_ENABLE); //screenmode.h
     // 240 px wide, 160 px tall
 
-    // explicitly putting 'p' after the position variable to avoid collisions with temporary variables and possibly to pause a moment to think about if this is the variable I mean to be using
-    long xp = 10, // x-position
-         yp = 100, // y-position
-         xv = 1, // x velocity
-         yv = 2; // y velocity
+    word xpos = 10,
+         ypos = 100,
+         xvel = 1,
+         yvel = 2;
 
-    const long grav = 1, // gravity
-               flr = 30; // floor (is a keyword?)
+    const word GRAV = 1,
+               FLOOR = 30,
+               SPEED = 5,
+               JUMP = 10;
 
     while (1) {
 
-        // erase old point
-        (VideoBuffer)[(160-yp)*240+xp] = RGB(0,0,0);
+        // erase old sprite (point)
+        (VideoBuffer)[(160-ypos)*240+xpos] = RGB(0,0,0);
+
+        // get input
+        if (KEYS & KEY_LEFT)
+            xvel = -1*SPEED;
+        if (KEYS & KEY_RIGHT)
+            xvel = SPEED;
+        if (!KEYS || (!(KEYS & KEY_LEFT) && !(KEYS & KEY_RIGHT))) // oh god please improve this (actually think, simplify)
+            xvel = 0;
+        if (KEYS & KEY_UP && ypos == FLOOR) // only JUMP if on FLOOR
+            yvel = JUMP;
 
         // simulate
-        yv -= grav; // apply gravity
-        xp += xv; // apply velocity
-        yp += yv;
-        if (yp < flr) { // pop out of floor
-            yp = flr;
-            yv = 0;
+        yvel -= GRAV; // apply gravity
+        xpos += xvel; // apply velocity
+        ypos += yvel;
+        if (ypos < FLOOR) { // pop out of floor
+            ypos = FLOOR;
+            yvel = 0;
         }
 
-        // draw
-        (VideoBuffer)[(160-yp)*240+xp] = RGB(31,31,31);
+        // draw sprite (point)
+        (VideoBuffer)[(160-ypos)*240+xpos] = RGB(31,31,31);
 
         // pause
-        int dummy = 0, counter;
-        for (counter = 0; counter < 8000; counter++) dummy += 2;
+        int dummy = 0;
+        while (dummy < 5000) dummy++;
 
     }
 
 }
-
-// void drawRect(int x, int y, int w, int h, int r, int g, int b) {
-//     int ix, iy;
-//     for (ix = x; ix < x+w; ix++)
-//          for (iy = y; iy < y+h; iy++)
-//              (VideoBuffer)[ ix + iy*240 ] = RGB(r, g, b);
-// }
