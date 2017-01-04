@@ -36,12 +36,12 @@ int main(void) {
     // draw floor
     word i;
     for (i = 0; i < 240; i++)
-        (VideoBuffer)[(160-FLOOR+1)*240+i] = RGB(0,10,31);
+        (VideoBuffer)[(160-FLOOR)*240+i] = RGB(0,10,31);
 
     while (1) {
 
-        // erase old sprite (well, point)
-        (VideoBuffer)[(160-ypos)*240+xpos] = RGB(0,0,0);
+        // erase old sprite
+        drawRect(xpos-5, 160-(ypos+10), 10, 10, 0, 0, 0);
 
         // get input
         if (KEYS & KEY_LEFT)
@@ -85,8 +85,8 @@ int main(void) {
             yvel = 0;
         }
 
-        // draw sprite (point)
-        (VideoBuffer)[(160-ypos)*240+xpos] = RGB(31,31,31);
+        // draw sprite
+        drawRect(xpos-5, 160-(ypos+10), 10, 10, 31, 31, 31);
 
         // pause
         int dummy = 0;

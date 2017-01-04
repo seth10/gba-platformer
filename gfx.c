@@ -28,3 +28,11 @@ s32 RAND(s32 Value)
 
    return ((((RAND_RandomData >> 16) & RAND_MAX) * Value) >> 15);
 }
+
+void drawRect(int x, int y, int w, int h, int r, int g, int b)
+{
+    int ix, iy;
+    for (ix = x; ix < x+w; ix++)
+        for (iy = y; iy < y+h; iy++)
+            (VideoBuffer)[ ix + iy*240 ] = RGB(r, g, b);
+}

@@ -30,6 +30,7 @@ s32 RAND(s32 Value);
 //usage somwhere in program SeedRandom();
 //then xrand = RAND(MAX_X); where MAX_X is range upper bound for value you want returned!
 
+void drawRect(int x, int y, int width, int height, int red, int green, int blue); // colors are 0-31, not 0-255!
 
 #endif
 
