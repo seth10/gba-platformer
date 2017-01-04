@@ -8,6 +8,7 @@
  * - subpixel positioning and detach movement speed from frame rate
  * - add a single platform
  * - implement a global coordinate system, array of platform positions and sizes, and a camera
+ * - try out other graphics modes like 4 for page flipping, and the tile modes
  * 
  */
 
@@ -38,7 +39,19 @@ int main(void) {
     for (i = 0; i < 240; i++)
         (VideoBuffer)[(160-FLOOR)*240+i] = RGB(0,10,31);
 
+    word state = 0; // 0 if waiting for VBlank, 1 if waiting for VDraw
+
     while (1) {
+
+        if (!(REG_DISPSTAT & 0x01)) { // VDraw
+            state = 0;
+            continue;
+        } else { // VBlank
+            if (state == 1) // already finished calculations
+                continue;
+            else // else not necessary
+                state = 1; // ... and let code below run
+        }
 
         // erase old sprite
         drawRect(xpos-5, 160-(ypos+10), 10, 10, 0, 0, 0);
