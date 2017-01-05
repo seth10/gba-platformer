@@ -29,27 +29,10 @@ s32 RAND(s32 Value)
    return ((((RAND_RandomData >> 16) & RAND_MAX) * Value) >> 15);
 }
 
-void drawRect(int x, int y, int w, int h, u8 c)
+void drawRect(int x, int y, int w, int h, int r, int g, int b)
 {
-    u16 *here = (~REG_DISPCNT & BACKBUFFER) ? (VideoBuffer) : ((u16*)0x600A000);
     int ix, iy;
-    for (ix = x/2; ix < (x+w+1)/2; ix++)
+    for (ix = x; ix < x+w; ix++)
         for (iy = y; iy < y+h; iy++)
-            if (ix*2 == x-1) // odd left edge, only draw right (most-significant) pixel
-                (here)[ ix%120 + iy*120 ] = c<<8;
-            else if (ix*2 == x+w-1) // odd right edge, only draw left (least-significant) pixel
-                (here)[ ix%120 + iy*120 ] = c;
-            else
-                (here)[ ix%120 + iy*120 ] = c + (c<<8); // a cheat implementation just used this statement but rounded down (well, left) odd rectangles to every second pixel (rounded down odd coordinates)
-            // when compared to just using two calls to drawPixelMode4, this method saves writes to vram but adds more comparisons (is cpu or vram bandwidth the bottleneck?)
-}
-
-void drawPixelMode4(int x, int y, u8 color)
-{
-    // using 120 instead of 240 because each word, every 16 bits, stores two colors
-    u16 *here = ((~REG_DISPCNT & BACKBUFFER) ? (VideoBuffer) : ((u16*)0x600A000)) + (x%240)/2 + (y*240)/2;
-    if (x % 2 == 0) // even, left, less-significant pixel
-        *here = color + (u8)(*here<<8);
-    else // odd, right, more-significant pixel
-        *here = (u8)*here + (color<<8);
+            (VideoBuffer)[ ix%240 + iy*240 ] = RGB(r, g, b);
 }

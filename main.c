@@ -8,7 +8,7 @@
  * - subpixel positioning and detach movement speed from frame rate
  * - add a single platform
  * - implement a global coordinate system, array of platform positions and sizes, and a camera
- * - try out the tile graphics modes
+ * - try out other graphics modes like 4 for page flipping, and the tile modes
  * 
  */
 
@@ -19,15 +19,8 @@
 
 int main(void) {
 
-    SetMode(MODE_4 | BG2_ENABLE); //screenmode.h
+    SetMode(MODE_3 | BG2_ENABLE); //screenmode.h
     // 240 px wide, 160 px tall
-    // 8bpp (bits per pixel), palette of 256 15-bit colors
-
-    // initialize palette
-    // index 0 is the transparency index
-    (BGPaletteMem)[1] = RGB(0,0,0); // background
-    (BGPaletteMem)[2] = RGB(0,10,31); // floor
-    (BGPaletteMem)[11] = RGB(31,31,31); // sprite color 1
 
     s32 xpos = 10, // must be signed
         ypos = 100,
@@ -44,18 +37,13 @@ int main(void) {
     // draw floor
     word i;
     for (i = 0; i < 240; i++)
-        drawPixelMode4(i, 160-FLOOR, 2);
-
-    // draw floor on the other page too
-    REG_DISPCNT = REG_DISPCNT ^ BACKBUFFER;
-    for (i = 0; i < 240; i++)
-        drawPixelMode4(i, 160-FLOOR, 2);
+        (VideoBuffer)[(160-FLOOR)*240+i] = RGB(0,10,31);
 
     while (1) {
-        while(REG_DISPSTAT ^ 0x01) ; // wait for VBlank
+        while(REG_VCOUNT < 160) ; // wait for VBlank
 
         // erase old sprite
-        drawRect(xpos-5, 160-(ypos+10), 10, 10, 0);
+        drawRect(xpos-5, 160-(ypos+10), 10, 10, 0, 0, 0);
 
         // get input
         if (KEYS & KEY_LEFT)
@@ -69,7 +57,7 @@ int main(void) {
                 xacc = 1;
             else
                 xacc = 0;
-        if (KEYS & (KEY_UP | KEY_A) && ypos == FLOOR) // only jump if on floor
+        if (KEYS & KEY_UP && ypos == FLOOR) // only jump if on floor
             yvel = JUMP;
 
         // simulate
@@ -99,13 +87,12 @@ int main(void) {
             yvel = 0;
         }
 
-        // flip page
-        REG_DISPCNT = REG_DISPCNT ^ BACKBUFFER;
-        
         // draw sprite
-        drawRect(xpos-5, 160-(ypos+10), 10, 10, 11);
+        drawRect(xpos-5, 160-(ypos+10), 10, 10, 31, 31, 31);
 
-        while(REG_DISPSTAT & 0x01) ; // wait for VBlank to be over (don't run game logic twice before it's drawn)
+        // pause
+        int dummy = 0;
+        while (dummy < 5000) dummy++;
 
     }
 
