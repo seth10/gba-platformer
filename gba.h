@@ -18,7 +18,7 @@ typedef unsigned long word;
 #define OAMmem         (u32*)0x7000000
 #define VideoBuffer    (u16*)0x6000000
 #define BackBuffer     (u16*)0x600A000
-#define OAMdata		   (u16*)0x6100000
+#define OAMdata        (u16*)0x6100000
 #define BGPaletteMem   (u16*)0x5000000
 #define OBJPaletteMem  (u16*)0x5000200
 		

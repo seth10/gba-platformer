@@ -37,7 +37,7 @@ s32 RAND(s32 Value);
 // display timing details
 // 240 pixels wide, 160 pixels tall, 68 "pixels" of blanking in each direction
 // useful to wait for VBlank:  while(REG_VCOUNT < VDraw) ; // wait for VBlank
-// if not using the display status register instead:  while(REG_DISPSTAT ^ 0x01) ;
+// if not using the display status register instead:  while(REG_DISPSTAT ^ DSTAT_IN_VBL) ;
 #define HDraw 240
 #define HBlank 68
 //#define scanline (HDraw+HBlank)
