@@ -17,6 +17,10 @@
 // 1 is a good delay for a game (like 30/60 fps) or something like that
 void Sleep(int i);
 
+// about 1ms, ShortSleep(1000) will take ~1 second
+void ShortSleep(int i);
+
+
 // The following code for random was taken from Mines10.zip of gbadev.org, that author
 // had the following comment in it:
 // random stuff extracted from an email from 'ninge1'
@@ -31,5 +35,31 @@ s32 RAND(s32 Value);
 //then xrand = RAND(MAX_X); where MAX_X is range upper bound for value you want returned!
 
 
-#endif
+// display timing details
+// 240 pixels wide, 160 pixels tall, 68 "pixels" of blanking in each direction
+#define HDraw 240
+#define HBlank 68
+#define VDraw 160
+#define VBlank 68
 
+#define DSTAT_IN_VBL 0x01
+#define DSTAT_IN_HBL 0x02
+void waitForHDraw();
+void waitForHBlank();
+void waitForVDraw();
+void waitForVBlank();
+
+// same definition but names more meaningful when not directly dealing with timing and the display buffers
+#define SCREEN_WIDTH HDraw
+#define SCREEN_HEIGHT VDraw
+
+void flipPage();
+
+
+// colors are 0-31 (5 bits per channel), not 0-255!
+void drawPixel(int x, int y, int red, int green, int blue);
+
+void drawRect(int x, int y, int width, int height, int red, int green, int blue); 
+
+
+#endif
