@@ -22,22 +22,32 @@ int main(void) {
     // 240 px wide, 160 px tall
     SetMode(MODE_3 | BG2_ENABLE); //screenmode.h
 
-    s32 xpos = 10, // must be signed (negative (leftward) velocities etc. are possible)
+    s16 xpos = 10, // must be signed (negative (leftward) velocities etc. are possible)
         ypos = 100,
         xvel = 0,
         yvel = 0,
         xacc = 0,
         yacc = 0;
 
-    const s32 GRAV  = 1,
+    const s16 GRAV  = 1,
               FLOOR = 30,
               SPEED = 7,
               JUMP  = 10;
     const double AIR_RES = 0.7; // air resistance
 
+    const s16 PLATS[][3] = // platforms (x, y, w (,h?))
+    {
+        {150, FLOOR+20, 50}
+    };
+
     // draw floor
     drawRect(0, SCREEN_HEIGHT-FLOOR, SCREEN_WIDTH, 1, 0,10,31);
     // subtracting the y-value from SCREEN_HEIGHT because 0,0 is the top-left, not bottom-left
+
+    // draw platform(s) (move to inside game loop when moving camera is implemented)
+    u8 plati; // platform index, not using "i" because it would still be accessible in the game loop scope
+    for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
+        drawRect(PLATS[plati][0], SCREEN_HEIGHT-PLATS[plati][1], PLATS[plati][2], 1, 31,10,0);
 
     while (1) {
 
@@ -65,6 +75,7 @@ int main(void) {
             yvel = JUMP;
         }
 
+        s16 prey = ypos; // record y's previous position before simulation
         // -- SIMULATE -- //
         // apply gravity
         yvel -= GRAV;
@@ -77,7 +88,7 @@ int main(void) {
         if (xvel < -1*SPEED)
            xvel = -1*SPEED;
         // apply velocity
-        if (ypos > FLOOR)
+        if (ypos > FLOOR) // how do I apply this to the platforms too, so there isn't air resistance when moving along a platform?
             xpos += AIR_RES*xvel; // (horizontal) air resistance
         else
             xpos += xvel; 
@@ -92,6 +103,19 @@ int main(void) {
             ypos = FLOOR;
             yvel = 0;
         }
+        // check for platform collisions
+        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++) {
+            const s16 *platform = PLATS[plati];
+            // check if within x bounds of this platform
+            if (xpos > platform[0] && xpos < platform[0]+platform[2]) {
+                // if it was previously above the platform and now it is below it
+                if (ypos <= platform[1] && prey >= platform[1]) {
+                    // pop up to standing on the platform
+                    ypos = platform[1];
+                    break; // no need to check other platforms
+                }
+            }
+        }
 
         // draw sprite
         drawRect(xpos-5, SCREEN_HEIGHT-(ypos+10), 10, 10, 31,31,31);
@@ -99,6 +123,6 @@ int main(void) {
         // pause
         ShortSleep(12);
 
-    }
+    } // end game loop
 
 }
