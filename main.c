@@ -55,9 +55,9 @@ int main(void) {
 
         // get input
         if (isPressedLeft() && !isPressedRight())
-            xacc--;
+            xacc = -1;
         else if (isPressedRight() && !isPressedLeft())
-            xacc++;
+            xacc = 1;
         // decelerate if neither pressed
         else 
             if (xvel > 0)
