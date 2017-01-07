@@ -75,7 +75,9 @@ int main(void) {
         // apply gravity
         yvel -= GRAV;
         // apply acceleration
-        xvel += xacc;
+        if (ypos == FLOOR)
+            xvel += xacc; // don't accelerate midair
+        //else xvel += xacc*0.9;
         yvel += yacc;
         // enfore maximum velocities
         if (xvel > SPEED)

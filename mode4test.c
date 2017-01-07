@@ -1,5 +1,5 @@
 /* 
- * Main written by Seth Tenembaum beginning Jan 2, 2017
+ * mode4test written by Seth Tenembaum beginning Jan 2, 2017
  * Credit to tonc (https://www.coranac.com/tonc/) for learning and some remarks used as comments.
  * 
  * The purpose of this document is to figure out how graphics mode 4 works through a minimal example.
