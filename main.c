@@ -37,7 +37,11 @@ int main(void) {
 
     const s16 PLATS[][3] = // platforms (x, y, w (,h?))
     {
-        {150, FLOOR+20, 50}
+        {150, FLOOR+20, 50},
+        {150, FLOOR+45, 50},
+        {20, FLOOR+35, 20},
+        {50, FLOOR+75, 25},
+        {80, FLOOR+125, 15},
     };
 
     // draw floor
