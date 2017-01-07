@@ -36,8 +36,6 @@ s32 RAND(s32 Value);
 
 // display timing details
 // 240 pixels wide, 160 pixels tall, 68 "pixels" of blanking in each direction
-// useful to wait for VBlank:  while(REG_VCOUNT < VDraw) ; // wait for VBlank
-// if not using the display status register instead:  while(REG_DISPSTAT ^ DSTAT_IN_VBL) ;
 #define HDraw 240
 #define HBlank 68
 //#define scanline (HDraw+HBlank)
@@ -66,12 +64,12 @@ void drawPixel_mode3(int x, int y, int red, int green, int blue);
 // colors are 0-31 (5 bits per channel), not 0-255!
 void drawRect_mode3(int x, int y, int width, int height, int red, int green, int blue); 
 
-// for graphics mode 4, this writes to whichever video buffer is *not* currently being displayed (hidden)!
+// for graphics mode 4, this writes to whichever video buffer is *not* currently being shown!
 // because you can't write to VRAM in 1-byte chunks(!) this function will
 // read the data from the adjacent pixel and add it to this one for a 2-byte write
 void drawPixel_mode4(int x, int y, u8 colorIndex);
 
-// again for mode 4, this writes to whichever video buffer is *not* currently being displayed (hidden)!
+// again for mode 4, this writes to the hidden buffer
 // the single color parameter is what index in the color palette to use
 void drawRect_mode4(int x, int y, int width, int height, u8 colorIndex);
 

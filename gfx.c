@@ -42,7 +42,7 @@ void waitForHBlank() { while(~REG_DISPSTAT & DSTAT_IN_HBL) ; }
 void waitForVDraw()  { while(REG_DISPSTAT & DSTAT_IN_VBL) ; }
 void waitForVBlank() { while(~REG_DISPSTAT & DSTAT_IN_VBL) ; }
 // using the display control register
-void flipPage() { REG_DISPCNT = REG_DISPCNT ^ BACKBUFFER; }
+void flipPage() { REG_DISPCNT ^= BACKBUFFER; }
 
 
 void drawPixel_mode3(int x, int y, int r, int g, int b)

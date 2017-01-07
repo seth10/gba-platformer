@@ -42,6 +42,7 @@ int main(void) {
     word i;
     for (i = 0; i < SCREEN_WIDTH; i++)
         drawPixel(i, SCREEN_HEIGHT-FLOOR, 31,10,0);
+    // subtracting the y-value from SCREEN_HEIGHT because 0,0 is the top-left, not bottom-left
 
 
     while (1) {
