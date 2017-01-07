@@ -44,11 +44,6 @@ int main(void) {
     drawRect(0, SCREEN_HEIGHT-FLOOR, SCREEN_WIDTH, 1, 0,10,31);
     // subtracting the y-value from SCREEN_HEIGHT because 0,0 is the top-left, not bottom-left
 
-    // draw platform(s) (move to inside game loop when moving camera is implemented)
-    u8 plati; // platform index, not using "i" because it would still be accessible in the game loop scope
-    for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-        drawRect(PLATS[plati][0], SCREEN_HEIGHT-PLATS[plati][1], PLATS[plati][2], 1, 31,10,0);
-
     while (1) {
 
         // don't write to VRAM while the display is being drawn to avoid tearing
@@ -104,6 +99,7 @@ int main(void) {
             yvel = 0;
         }
         // check for platform collisions
+        u8 plati;
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++) {
             const s16 *platform = PLATS[plati];
             // check if within x bounds of this platform
@@ -112,16 +108,21 @@ int main(void) {
                 if (ypos <= platform[1] && prey >= platform[1]) {
                     // pop up to standing on the platform
                     ypos = platform[1];
+                    yvel = 0;
                     break; // no need to check other platforms
                 }
             }
         }
 
+        // draw platform(s)
+        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
+            drawRect(PLATS[plati][0], SCREEN_HEIGHT-PLATS[plati][1], PLATS[plati][2], 1, 31,10,0);
+
         // draw sprite
         drawRect(xpos-5, SCREEN_HEIGHT-(ypos+10), 10, 10, 31,31,31);
 
         // pause
-        ShortSleep(12);
+        ShortSleep(16);
 
     } // end game loop
 
