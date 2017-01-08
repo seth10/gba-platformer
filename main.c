@@ -19,7 +19,15 @@
 int main(void) {
 
     // 240 px wide, 160 px tall
-    SetMode(MODE_3 | BG2_ENABLE); //screenmode.h
+    SetMode(MODE_4 | BG2_ENABLE); // defined in screenmode.h
+    // shorthand
+    #define drawPixel drawPixel_mode4
+    #define drawRect drawRect_mode4
+
+    // initialize palette
+    *(BGPaletteMem + 0x01) = RGB(31,31,31); // character
+    *(BGPaletteMem + 0x02) = RGB( 0,10,31); // floor
+    *(BGPaletteMem + 0x03) = RGB(31,10, 0); // platforms
 
     s16 xpos = 30, // must be signed (negative (leftward) velocities etc. are possible)
         ypos = 100,
@@ -53,10 +61,32 @@ int main(void) {
     const s16 CAM_MOV_BUF = 20; // how far from the edge of the screen to start scrolling
 
     // draw floor
-    drawRect(0, SCREEN_HEIGHT-FLOOR, SCREEN_WIDTH, 1, 0,10,31);
+    drawRect(0, SCREEN_HEIGHT-FLOOR, SCREEN_WIDTH, 1, 0x02);
+    flipPage(); // draw floor on the other page too
+    drawRect(0, SCREEN_HEIGHT-FLOOR, SCREEN_WIDTH, 1, 0x02);
     // subtracting the y-value from SCREEN_HEIGHT because 0,0 is the top-left, not bottom-left
 
+    /* -- GAME LOOP --
+     * erase what's on the back buffer
+     * get input
+     * simulated
+     * draw platforms and sprite on back buffer
+     * pause
+     * wait for VBlank
+     * flip page
+     */
     while (1) {
+
+        // erase old sprite
+        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0x00);
+
+        // erase platforms
+        u8 plati;
+        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
+            if (PLATS[plati][0]+PLATS[plati][2] >= xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
+                drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 0x00);
+
+        drawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00); // DEBUG REMOVE ME
 
         // get input
         if (isPressedLeft() && !isPressedRight())
@@ -77,7 +107,6 @@ int main(void) {
         }
 
         s16 ypre = ypos; // record vertial position before simulation
-        s16 xprecam = xcam; // record camera position before scrolling
 
         // -- SIMULATE -- //
         // apply gravity
@@ -108,7 +137,6 @@ int main(void) {
         }
 
         // check for platform collisions
-        u8 plati;
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++) {
             const s16 *platform = PLATS[plati];
             // check if within x bounds of this platform
@@ -123,30 +151,20 @@ int main(void) {
             }
         }
 
-        // erase old platforms
-        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            if (PLATS[plati][0]+PLATS[plati][2] >= xprecam || PLATS[plati][0] < SCREEN_WIDTH+xprecam) // if was on-screen
-                if (xprecam < xcam) // camera moved right (platforms moved left)
-                    drawRect(PLATS[plati][0]+PLATS[plati][2]-xcam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xcam - xprecam, 1, 0,0,0);
-                else if (xprecam > xcam) // camera moved left (platforms moved right)
-                    drawRect(PLATS[plati][0]-xprecam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xprecam - xcam, 1, 0,0,0);
-
         // draw platform(s)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
             if (PLATS[plati][0]+PLATS[plati][2] >= xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
-                drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 31,10,0);
+                drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 0x03);
 
         // draw sprite
-        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 31,31,31);
+        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0x01);
 
         // pause
-        ShortSleep(6);
+        //ShortSleep(6);
 
-        // don't write to VRAM while the display is being drawn to avoid tearing
+        // don't write to VRAM while the display is being drawn
         waitForVBlank(); // from gfx.h
-
-        // erase old sprite
-        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0,0,0);
+        flipPage(); // erase stuff after flip, erase from what was the front buffer but is now the back
 
     } // end game loop
 
