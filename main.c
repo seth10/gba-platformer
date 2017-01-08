@@ -5,8 +5,7 @@
  * 
  * TODO
  * - subpixel positioning and detach movement speed from frame rate
- * - add a single platform
- * - implement a global coordinate system, array of platform positions and sizes, and a camera
+ * - fix inability to jump off platforms
  * - try out the tile graphics modes
  * 
  */
@@ -78,6 +77,7 @@ int main(void) {
         }
 
         s16 prey = ypos; // record y's previous position before simulation
+        s16 prex = xpos;
         // -- SIMULATE -- //
         // apply gravity
         yvel -= GRAV;
@@ -123,13 +123,14 @@ int main(void) {
 
         // draw platform(s)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 31,10,0);
+            if (PLATS[plati][0]+PLATS[plati][2] >= 0+xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
+                drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 31,10,0);
 
         // draw sprite
         drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 31,31,31);
 
         // pause
-        ShortSleep(16);
+        //ShortSleep(16);
 
         // don't write to VRAM while the display is being drawn to avoid tearing
         waitForVBlank(); // from gfx.h
@@ -137,9 +138,13 @@ int main(void) {
         // erase old sprite
         drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0,0,0);
 
-        // erase old platforms (TODO: try only erasing the parts that moved)
+        // erase old platforms (why not erase first then draw hm?)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 0,0,0);
+            if (PLATS[plati][0]+PLATS[plati][2] >= 0+xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
+                if (prex-xpos < 0) // moved right
+                    drawRect((PLATS[plati][0]-xcam) + (PLATS[plati][2]-prex), SCREEN_HEIGHT-(PLATS[plati][1]-ycam), prex, 1, 0,0,0);
+                else if (prex-xpos > 0) // moved left
+                    drawRect((PLATS[plati][0]-xcam) - (prex-xpos), SCREEN_HEIGHT-(PLATS[plati][1]-ycam), prex-xpos, 1, 0,0,0);
 
     } // end game loop
 
