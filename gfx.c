@@ -46,7 +46,9 @@ void flipPage() { REG_DISPCNT ^= BACKBUFFER; }
 
 void drawPixel(int x, int y, int r, int g, int b)
 {
-    (VideoBuffer)[ x%SCREEN_WIDTH + y*SCREEN_WIDTH ] = RGB(r,g,b);
+    if (x < 0 || y < 0 || x >= SCREEN_WIDTH || y >= SCREEN_HEIGHT)
+        return;
+    (VideoBuffer)[ x + y*SCREEN_WIDTH ] = RGB(r,g,b);
 }
 
 void drawRect(int x, int y, int w, int h, int r, int g, int b)

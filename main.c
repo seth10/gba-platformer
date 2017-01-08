@@ -37,11 +37,16 @@ int main(void) {
 
     const s16 PLATS[][3] = // platforms (x, y, w (,h?))
     {
-        {150, FLOOR+ 20, 50},
-        {150, FLOOR+ 45, 50},
+        {-90, FLOOR+ 20, 20},
+
         { 20, FLOOR+ 35, 20},
         { 50, FLOOR+ 75, 25},
         { 80, FLOOR+125, 15},
+
+        {150, FLOOR+ 20, 50},
+        {150, FLOOR+ 45, 50},
+
+        {300, FLOOR+ 30, 40}
     };
 
     s16 xcam = 0, // camera offset
@@ -53,12 +58,6 @@ int main(void) {
     // subtracting the y-value from SCREEN_HEIGHT because 0,0 is the top-left, not bottom-left
 
     while (1) {
-
-        // don't write to VRAM while the display is being drawn to avoid tearing
-        waitForVBlank(); // from gfx.h
-
-        // erase old sprite
-        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0,0,0);
 
         // get input
         if (isPressedLeft() && !isPressedRight())
@@ -131,6 +130,16 @@ int main(void) {
 
         // pause
         ShortSleep(16);
+
+        // don't write to VRAM while the display is being drawn to avoid tearing
+        waitForVBlank(); // from gfx.h
+
+        // erase old sprite
+        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0,0,0);
+
+        // erase old platforms (TODO: try only erasing the parts that moved)
+        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
+            drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 0,0,0);
 
     } // end game loop
 
