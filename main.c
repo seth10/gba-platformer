@@ -22,7 +22,7 @@ int main(void) {
     // 240 px wide, 160 px tall
     SetMode(MODE_3 | BG2_ENABLE); //screenmode.h
 
-    s16 xpos = 10, // must be signed (negative (leftward) velocities etc. are possible)
+    s16 xpos = 30, // must be signed (negative (leftward) velocities etc. are possible)
         ypos = 100,
         xvel = 0,
         yvel = 0,
@@ -37,12 +37,16 @@ int main(void) {
 
     const s16 PLATS[][3] = // platforms (x, y, w (,h?))
     {
-        {150, FLOOR+20, 50},
-        {150, FLOOR+45, 50},
-        {20, FLOOR+35, 20},
-        {50, FLOOR+75, 25},
-        {80, FLOOR+125, 15},
+        {150, FLOOR+ 20, 50},
+        {150, FLOOR+ 45, 50},
+        { 20, FLOOR+ 35, 20},
+        { 50, FLOOR+ 75, 25},
+        { 80, FLOOR+125, 15},
     };
+
+    s16 xcam = 0, // camera offset
+        ycam = 0;
+    const s16 CAM_MOV_BUF = 20; // how far from the edge of the screen to start scrolling
 
     // draw floor
     drawRect(0, SCREEN_HEIGHT-FLOOR, SCREEN_WIDTH, 1, 0,10,31);
@@ -54,7 +58,7 @@ int main(void) {
         waitForVBlank(); // from gfx.h
 
         // erase old sprite
-        drawRect(xpos-5, SCREEN_HEIGHT-(ypos+10), 10, 10, 0,0,0);
+        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0,0,0);
 
         // get input
         if (isPressedLeft() && !isPressedRight())
@@ -93,10 +97,10 @@ int main(void) {
             xpos += xvel; 
         ypos += yvel;
         // wrap x-coordinate
-        if (xpos > SCREEN_WIDTH)
-            xpos -= SCREEN_WIDTH;
-        if (xpos < 0)
-            xpos += SCREEN_WIDTH;
+        if (xpos-xcam > SCREEN_WIDTH - CAM_MOV_BUF)
+            xcam += (xpos-xcam) - (SCREEN_WIDTH - CAM_MOV_BUF);
+        if (xpos-xcam < 0 + CAM_MOV_BUF)
+            xcam -= (0 + CAM_MOV_BUF) - (xpos-xcam);
         // pop out of floor
         if (ypos < FLOOR) {
             ypos = FLOOR;
@@ -120,10 +124,10 @@ int main(void) {
 
         // draw platform(s)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            drawRect(PLATS[plati][0], SCREEN_HEIGHT-PLATS[plati][1], PLATS[plati][2], 1, 31,10,0);
+            drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 31,10,0);
 
         // draw sprite
-        drawRect(xpos-5, SCREEN_HEIGHT-(ypos+10), 10, 10, 31,31,31);
+        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 31,31,31);
 
         // pause
         ShortSleep(16);
