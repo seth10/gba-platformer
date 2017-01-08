@@ -76,8 +76,10 @@ int main(void) {
             yvel = JUMP;
         }
 
-        s16 prey = ypos; // record y's previous position before simulation
-        s16 prex = xpos;
+        s16 ypre = ypos, // record positions before simulation
+            xpre = xpos;
+        s16 yprecam = ycam, // record camera position before simulation
+            xprecam = xcam;
         // -- SIMULATE -- //
         // apply gravity
         yvel -= GRAV;
@@ -95,7 +97,7 @@ int main(void) {
         else
             xpos += xvel; 
         ypos += yvel;
-        // wrap x-coordinate
+        // move camera
         if (xpos-xcam > SCREEN_WIDTH - CAM_MOV_BUF)
             xcam += (xpos-xcam) - (SCREEN_WIDTH - CAM_MOV_BUF);
         if (xpos-xcam < 0 + CAM_MOV_BUF)
@@ -105,6 +107,12 @@ int main(void) {
             ypos = FLOOR;
             yvel = 0;
         }
+
+        s16 ydel = ypos - ypre, // movement deltas (note: calculated before platform collisions)
+            xdel = xpos - xpre;
+        s16 ydelcam = ycam - yprecam, // camera movement deltas (note: calculated before platform collisions)
+            xdelcam = xcam - xprecam;
+
         // check for platform collisions
         u8 plati;
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++) {
@@ -112,7 +120,7 @@ int main(void) {
             // check if within x bounds of this platform
             if (xpos > platform[0] && xpos < platform[0]+platform[2]) {
                 // if it was previously above the platform and now it is below it
-                if (ypos <= platform[1] && prey >= platform[1]) {
+                if (ypos <= platform[1] && ypre >= platform[1]) {
                     // pop up to standing on the platform
                     ypos = platform[1];
                     yvel = 0;
@@ -123,14 +131,14 @@ int main(void) {
 
         // draw platform(s)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            if (PLATS[plati][0]+PLATS[plati][2] >= 0+xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
+            if (PLATS[plati][0]+PLATS[plati][2] >= xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
                 drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 31,10,0);
 
         // draw sprite
         drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 31,31,31);
 
         // pause
-        //ShortSleep(16);
+        ShortSleep(6);
 
         // don't write to VRAM while the display is being drawn to avoid tearing
         waitForVBlank(); // from gfx.h
@@ -140,11 +148,11 @@ int main(void) {
 
         // erase old platforms (why not erase first then draw hm?)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            if (PLATS[plati][0]+PLATS[plati][2] >= 0+xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
-                if (prex-xpos < 0) // moved right
-                    drawRect((PLATS[plati][0]-xcam) + (PLATS[plati][2]-prex), SCREEN_HEIGHT-(PLATS[plati][1]-ycam), prex, 1, 0,0,0);
-                else if (prex-xpos > 0) // moved left
-                    drawRect((PLATS[plati][0]-xcam) - (prex-xpos), SCREEN_HEIGHT-(PLATS[plati][1]-ycam), prex-xpos, 1, 0,0,0);
+            if (PLATS[plati][0]+PLATS[plati][2] >= xprecam || PLATS[plati][0] < SCREEN_WIDTH+xprecam) // if was on-screen
+                if (xprecam < xcam) // camera moved right (platforms moved left)
+                    drawRect(PLATS[plati][0]-xprecam+PLATS[plati][2]-xdelcam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xdelcam, 1, 0,0,0);
+                else if (xprecam > xcam) // camera moved left (platforms moved right)
+                    drawRect(PLATS[plati][0]-xprecam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), -1*xdelcam, 1, 0,0,0);
 
     } // end game loop
 
