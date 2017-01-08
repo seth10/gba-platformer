@@ -76,10 +76,9 @@ int main(void) {
             yvel = JUMP;
         }
 
-        s16 ypre = ypos, // record positions before simulation
-            xpre = xpos;
-        s16 yprecam = ycam, // record camera position before simulation
-            xprecam = xcam;
+        s16 ypre = ypos; // record vertial position before simulation
+        s16 xprecam = xcam; // record camera position before scrolling
+
         // -- SIMULATE -- //
         // apply gravity
         yvel -= GRAV;
@@ -108,11 +107,6 @@ int main(void) {
             yvel = 0;
         }
 
-        s16 ydel = ypos - ypre, // movement deltas (note: calculated before platform collisions)
-            xdel = xpos - xpre;
-        s16 ydelcam = ycam - yprecam, // camera movement deltas (note: calculated before platform collisions)
-            xdelcam = xcam - xprecam;
-
         // check for platform collisions
         u8 plati;
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++) {
@@ -133,9 +127,9 @@ int main(void) {
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
             if (PLATS[plati][0]+PLATS[plati][2] >= xprecam || PLATS[plati][0] < SCREEN_WIDTH+xprecam) // if was on-screen
                 if (xprecam < xcam) // camera moved right (platforms moved left)
-                    drawRect(PLATS[plati][0]-xprecam+PLATS[plati][2]-xdelcam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xdelcam, 1, 0,0,0);
+                    drawRect(PLATS[plati][0]+PLATS[plati][2]-xcam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xcam - xprecam, 1, 0,0,0);
                 else if (xprecam > xcam) // camera moved left (platforms moved right)
-                    drawRect(PLATS[plati][0]-xprecam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), -1*xdelcam, 1, 0,0,0);
+                    drawRect(PLATS[plati][0]-xprecam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xprecam - xcam, 1, 0,0,0);
 
         // draw platform(s)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
