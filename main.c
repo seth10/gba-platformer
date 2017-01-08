@@ -66,27 +66,23 @@ int main(void) {
     drawRect(0, SCREEN_HEIGHT-FLOOR, SCREEN_WIDTH, 1, 0x02);
     // subtracting the y-value from SCREEN_HEIGHT because 0,0 is the top-left, not bottom-left
 
+    s16 xpos_pre, ypos_pre, xcam_pre, ycam_pre; // to store previous position data for erasing the buffer
+
     /* -- GAME LOOP --
-     * erase what's on the back buffer
      * get input
      * simulated
      * draw platforms and sprite on back buffer
      * pause
      * wait for VBlank
      * flip page
+     * erase what (was?) on the back buffer
      */
     while (1) {
 
-        // erase old sprite
-        drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0x00);
-
-        // erase platforms
-        u8 plati;
-        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            if (PLATS[plati][0]+PLATS[plati][2] >= xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
-                drawRect(PLATS[plati][0]-xcam, SCREEN_HEIGHT-PLATS[plati][1]-ycam, PLATS[plati][2], 1, 0x00);
-
-        drawRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, 0x00); // DEBUG REMOVE ME
+        xpos_pre = xpos;
+        ypos_pre = ypos;
+        xcam_pre = xcam;
+        ycam_pre = ycam;
 
         // get input
         if (isPressedLeft() && !isPressedRight())
@@ -137,6 +133,7 @@ int main(void) {
         }
 
         // check for platform collisions
+        u8 plati;
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++) {
             const s16 *platform = PLATS[plati];
             // check if within x bounds of this platform
@@ -165,6 +162,14 @@ int main(void) {
         // don't write to VRAM while the display is being drawn
         waitForVBlank(); // from gfx.h
         flipPage(); // erase stuff after flip, erase from what was the front buffer but is now the back
+
+        // erase old sprite
+        drawRect(xpos_pre-5-xcam_pre, SCREEN_HEIGHT-(ypos_pre+10-ycam_pre), 10, 10, 0x00);
+
+        // erase platforms
+        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
+            if (PLATS[plati][0]+PLATS[plati][2] >= xcam_pre || PLATS[plati][0] < SCREEN_WIDTH+xcam_pre) // if on-screen
+                drawRect(PLATS[plati][0]-xcam_pre, SCREEN_HEIGHT-PLATS[plati][1]-ycam_pre, PLATS[plati][2], 1, 0x00);
 
     } // end game loop
 
