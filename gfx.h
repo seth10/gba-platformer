@@ -56,10 +56,20 @@ void waitForVBlank();
 void flipPage();
 
 
+// "_mode#" appended because no function overloading in vanilla C :C
+// this method will ignore calls to draw off-screen "pixels"
+void drawPixel_mode3(int x, int y, int red, int green, int blue);
+
 // colors are 0-31 (5 bits per channel), not 0-255!
-void drawPixel(int x, int y, int red, int green, int blue);
+void drawRect_mode3(int x, int y, int width, int height, int red, int green, int blue); 
 
-void drawRect(int x, int y, int width, int height, int red, int green, int blue); 
+// for graphics mode 4, this writes to whichever video buffer is *not* currently being shown!
+// because you can't write to VRAM in 1-byte chunks(!) this function will
+// read the data from the adjacent pixel and add it to this one for a 2-byte write
+void drawPixel_mode4(int x, int y, u8 colorIndex);
 
+// again for mode 4, this writes to the hidden buffer
+// the single color parameter is what index in the color palette to use
+void drawRect_mode4(int x, int y, int width, int height, u8 colorIndex);
 
 #endif
