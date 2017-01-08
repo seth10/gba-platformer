@@ -129,6 +129,14 @@ int main(void) {
             }
         }
 
+        // erase old platforms
+        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
+            if (PLATS[plati][0]+PLATS[plati][2] >= xprecam || PLATS[plati][0] < SCREEN_WIDTH+xprecam) // if was on-screen
+                if (xprecam < xcam) // camera moved right (platforms moved left)
+                    drawRect(PLATS[plati][0]-xprecam+PLATS[plati][2]-xdelcam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xdelcam, 1, 0,0,0);
+                else if (xprecam > xcam) // camera moved left (platforms moved right)
+                    drawRect(PLATS[plati][0]-xprecam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), -1*xdelcam, 1, 0,0,0);
+
         // draw platform(s)
         for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
             if (PLATS[plati][0]+PLATS[plati][2] >= xcam || PLATS[plati][0] < SCREEN_WIDTH+xcam) // if on-screen
@@ -145,14 +153,6 @@ int main(void) {
 
         // erase old sprite
         drawRect(xpos-5-xcam, SCREEN_HEIGHT-(ypos+10-ycam), 10, 10, 0,0,0);
-
-        // erase old platforms (why not erase first then draw hm?)
-        for (plati = 0; plati < sizeof(PLATS)/sizeof(*PLATS); plati++)
-            if (PLATS[plati][0]+PLATS[plati][2] >= xprecam || PLATS[plati][0] < SCREEN_WIDTH+xprecam) // if was on-screen
-                if (xprecam < xcam) // camera moved right (platforms moved left)
-                    drawRect(PLATS[plati][0]-xprecam+PLATS[plati][2]-xdelcam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), xdelcam, 1, 0,0,0);
-                else if (xprecam > xcam) // camera moved left (platforms moved right)
-                    drawRect(PLATS[plati][0]-xprecam, SCREEN_HEIGHT-(PLATS[plati][1]-ycam), -1*xdelcam, 1, 0,0,0);
 
     } // end game loop
 
