@@ -61,7 +61,7 @@ void drawRect_mode3(int x, int y, int w, int h, int r, int g, int b)
 void drawPixel_mode4(int x, int y, u8 color)
 {
     // using 120 (dividing by 2) instead of 240 because each word, every 16 bits, stores two pixels
-    u16 *here = (REG_DISPCNT & BACKBUFFER ? VideoBuffer : BackBuffer) + x%(SCREEN_WIDTH/2) + y*(SCREEN_WIDTH/2);
+    u16 *here = (REG_DISPCNT & BACKBUFFER ? VideoBuffer : BackBuffer) + x/2%SCREEN_WIDTH + y*(SCREEN_WIDTH/2);
     if (x % 2 == 0) // even, left, less-significant pixel
         *here = color + (*here & 0xFF00);
     else // odd, right, more-significant pixel
